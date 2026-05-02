@@ -35,8 +35,17 @@ export const getDashboard = async (req, res) => {
         userId: session.userId,
       }).lean();
 
-      if (!employee)
-        return res.status(404).json({ error: "Employee not found" });
+      if (!employee) {
+        // If an employee profile is missing, return a minimal dashboard
+        // so the frontend can still render a useful view instead of failing.
+        return res.json({
+          role: "EMPLOYEE",
+          employee: { id: session.userId, email: session.email || "" },
+          currentMonthAttendance: 0,
+          pendingLeaves: 0,
+          latestPayslip: null,
+        });
+      }
 
       const today = new Date();
       const [currentMonthAttendance, pendingLeaves, latestPayslip] =
