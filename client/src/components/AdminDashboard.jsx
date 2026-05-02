@@ -33,7 +33,7 @@ const AdminDashboard = ({ data }) => {
             <div className='page-header'>
                 <h1 className='page-title'>Dashboard</h1>
                 <p className='page-subtitle'>
-                    Welcome back, Admin! Here's a quick ovreview of the company's stats and activities.
+                    Welcome back, Admin! Here's a quick overview of the company's stats and activities.
                 </p>
             </div>
 

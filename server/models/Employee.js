@@ -43,7 +43,7 @@ const employeeSchema = new mongoose.Schema(
     },
     employmentStatus: {
       type: String,
-      enum: ["ATIVE", "INACTIVE"],
+      enum: ["ACTIVE", "INACTIVE"],
       default: "ACTIVE",
     },
     joinDate: {
