@@ -10,7 +10,7 @@ export const getProfile = async (req, res) => {
     if (!employee) {
       // Authenticated User is Not an Employee - Return Admin Profile
       return res.json({
-        firstName: "Admim",
+        firstName: "Admin",
         lastName: "",
         email: session.email,
       });
