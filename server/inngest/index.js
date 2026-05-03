@@ -67,7 +67,7 @@ const autoCheckOut = inngest.createFunction(
 const leaveApplicationReminder = inngest.createFunction(
   {
     id: "leave-application-reminder",
-    triggers: [{ event: "leave/check-outpending" }],
+    triggers: [{ event: "leave/pending" }],
   },
 
   async ({ event, step }) => {
@@ -79,8 +79,7 @@ const leaveApplicationReminder = inngest.createFunction(
       new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
     );
 
-    const leaveApplication =
-      await LeaveApplication.findById(leaveApplicationId);
+    const leaveApplication = await LeaveApplication.findById(leaveApplicationId);
 
     if (leaveApplication?.status === "PENDING") {
       const employee = await Employee.findById(leaveApplication.employeeId);
@@ -139,8 +138,8 @@ const attendanceReminderCron = inngest.createFunction(
     const onLeaveIds = await step.run("get-on-leave-ids", async () => {
       const leaves = await LeaveApplication.find({
         status: "APPROVED",
-        startDate: { $lte: new Date(todat.endUTC) },
-        endDate: { $lte: new Date(todat.startUTC) },
+        startDate: { $lte: new Date(today.endUTC) },
+        endDate: { $gte: new Date(today.startUTC) },
       }).lean();
       return leaves.map((l) => l.employeeId.toString());
     });
@@ -161,8 +160,7 @@ const attendanceReminderCron = inngest.createFunction(
     // Step 6: Send Reminder Emails
     if (absentEmployees.length > 0) {
       await step.run("send-reminder-emails", async () => {
-        const emailPromises = absentEmployees.map((emp) => {
-          // Send Email
+        const emailPromises = absentEmployees.map((emp) =>
           sendEmail({
             to: emp.email,
             subject: `Attendance Reminder - Please Mark Your Attendance`,
@@ -178,17 +176,17 @@ const attendanceReminderCron = inngest.createFunction(
                                 <p style="font-size: 16px;">Best Regards,</p>
                                 <p style="font-size: 16px;"><strong>QuickEMS</strong></p>
                             </div>`,
-          });
-        });
+          }),
+        );
+
+        return Promise.all(emailPromises);
       });
     }
-
-    await Promise.all(emailPromises)
 
     return {
       totalActive: activeEmployees.length,
       onLeave: onLeaveIds.length,
-      checkedIn: length,
+      checkedIn: checkedInIds.length,
       absent: absentEmployees.length,
     };
   },
