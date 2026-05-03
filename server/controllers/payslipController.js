@@ -49,8 +49,9 @@ export const getPayslips = async (req, res) => {
           employee: obj.employeeId,
           employeeId: obj.employeeId?._id?.toString(),
         };
-        return res.json({ data });
       });
+
+      return res.json({ data });
     } else {
       const employee = await Employee.findOne({ userId: session.userId });
 
