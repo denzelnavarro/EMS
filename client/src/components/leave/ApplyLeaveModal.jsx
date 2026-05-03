@@ -1,5 +1,7 @@
 import { CalendarDays, FileText, Loader2, Send, X } from "lucide-react";
 import { useState } from "react"
+import toast from "react-hot-toast";
+import api from "../../api/axios";
 
 
 const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
@@ -11,6 +13,19 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true)
+        const formData = new FormData(e.currentTarget)
+        const data = Object.fromEntries(formData.entries())
+
+        try {
+            await api.post("/leave", data)
+            onSuccess()
+            onClose()
+        } catch (err) {
+            toast.error(err.response?.data?.error || err?.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     if (!open) return null
@@ -28,7 +43,7 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 {/* FORM */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     {/* leave type */}
@@ -37,7 +52,7 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
                             <FileText className="w-4 h-4 text-slate-400" />
                             Leave Type
                         </label>
-                        <select name="tyoe" required>
+                        <select name="type" required>
                             <option value="SICK">Sick Leave</option>
                             <option value="CASUAL">Casual Leave</option>
                             <option value="ANNUAL">Annual Leave</option>
@@ -53,11 +68,11 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <span className="block text-xs text-slate-400 mb-1">From</span>
-                                <input type="date" name="startDate" required min={minDate}/>
+                                <input type="date" name="startDate" required min={minDate} />
                             </div>
                             <div>
                                 <span className="block text-xs text-slate-400 mb-1">To</span>
-                                <input type="date" name="endDate" required min={minDate}/>
+                                <input type="date" name="endDate" required min={minDate} />
                             </div>
                         </div>
                     </div>
@@ -67,7 +82,7 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
                         <label className="text-sm font-medium text-slate-700 mb-2 block">
                             Reason
                         </label>
-                        <textarea name="reason" required rows={3} className="resize-none" placeholder="Briefly describe why you need this leave..."/>
+                        <textarea name="reason" required rows={3} className="resize-none" placeholder="Briefly describe why you need this leave..." />
                     </div>
 
                     {/* buttons */}
@@ -76,7 +91,7 @@ const ApplyLeaveModal = ({ open, onClose, onSuccess }) => {
                             Cancel
                         </button>
 
-                        <button onClick={onClose} disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <button disabled={loading} type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                             {loading ? "Submitting..." : "Submit"}
                         </button>
