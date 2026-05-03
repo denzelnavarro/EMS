@@ -31,7 +31,7 @@ export const createLeave = async (req, res) => {
         .json({ error: "Leave dates must be in the future" });
     }
 
-    if (new Date(endDate) < today || new Date(startDate)) {
+    if (new Date(endDate) < new Date(startDate)) {
       return res
         .status(400)
         .json({ error: "End date cannot be before start date" });
